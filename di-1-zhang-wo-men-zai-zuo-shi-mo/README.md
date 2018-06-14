@@ -1,4 +1,4 @@
-# 第 1 章：我们在做什么？
+# 第 1 章: 我们在做什么？
 
 ## 介绍
 
@@ -6,19 +6,17 @@
 
 我并不假设你之前有任何函数式编程相关的知识——我们都知道假设的后果是什么（译者注：此处原文是“we both know what happens when you assume”，源自一句名言“When you assume you make an ASS of U and ME”，意思是“让两人都难堪”）。但我猜想你在使用可变状态（mutable state）、无限制副作用（unrestricted side effects）和无原则设计（unprincipled design）的过程中已经遇到过一些麻烦。好了，介绍到此为止，我们进入正题。
 
-本章的目的是让你对函数式编程的目的有一个初步认识，对一个程序之所以是*函数式*程序的原因有一定了解，要不然就会像无头苍蝇一样，不问青红皂白地避免使用对象——这等于是在做无用功。写代码需要遵循一定的原则，就像水流湍急的时候你需要天文罗盘来指引一样。
+本章的目的是让你对函数式编程的目的有一个初步认识，对一个程序之所以是_函数式_程序的原因有一定了解，要不然就会像无头苍蝇一样，不问青红皂白地避免使用对象——这等于是在做无用功。写代码需要遵循一定的原则，就像水流湍急的时候你需要天文罗盘来指引一样。
 
 现在已经有一些通用的编程原则了，各种缩写词带领我们在编程的黑暗隧道里前行：DRY（不要重复自己，don't repeat yourself），高内聚低耦合（loose coupling high cohesion），YAGNI （你不会用到它的，ya ain't gonna need it），最小意外原则（Principle of least surprise），单一责任（single responsibility）等等。
 
 我当然不会啰里八嗦地把这些年我听到的原则都列举出来，你知道重点就行。重点是这些原则同样适用于函数式编程，只不过它们与本书的主题不十分相关。在我们深入主题之前，我想先通过本章给你这样一种感觉，即你在敲键盘的时候内心就能强烈感受到的那种函数式的氛围。
 
-<!--BREAK-->
-
 ## 一个简单例子
 
 我们从一个愚蠢的例子开始。下面是一个海鸥程序，鸟群合并则变成了一个更大的鸟群，繁殖则增加了鸟群的数量，增加的数量就是它们繁殖出来的海鸥的数量。注意这个程序并不是面向对象的良好实践，它只是强调当前这种变量赋值方式的一些弊端。
 
-```js
+```javascript
 var Flock = function(n) {
   this.seagulls = n;
 };
@@ -47,7 +45,7 @@ var result = flock_a.conjoin(flock_c).breed(flock_b).conjoin(flock_a.breed(flock
 
 我们试试另一种更函数式的写法：
 
-```js
+```javascript
 var conjoin = function(flock_x, flock_y) { return flock_x + flock_y };
 var breed = function(flock_x, flock_y) { return flock_x * flock_y };
 
@@ -63,7 +61,7 @@ var result = conjoin(breed(flock_b, conjoin(flock_a, flock_c)), breed(flock_a, f
 
 代码中的两个函数除了函数名有些特殊，其他没有任何难以理解的地方。我们把它们重命名一下，看看它们的真面目。
 
-```js
+```javascript
 var add = function(x, y) { return x + y };
 var multiply = function(x, y) { return x * y };
 
@@ -77,7 +75,7 @@ var result = add(multiply(flock_b, add(flock_a, flock_c)), multiply(flock_a, flo
 
 这么一来，你会发现我们不过是在运用古人早已获得的知识：
 
-```js
+```javascript
 // 结合律（assosiative）
 add(add(x, y), z) == add(x, add(y, z));
 
@@ -93,7 +91,7 @@ multiply(x, add(y,z)) == add(multiply(x, y), multiply(x, z));
 
 是的，这些经典的数学定律迟早会派上用场。不过如果你一时想不起来也没关系，多数人已经很久没复习过这些数学知识了。我们来看看能否运用这些定律简化这个海鸥小程序。
 
-```js
+```javascript
 // 原有代码
 add(multiply(flock_b, add(flock_a, flock_c)), multiply(flock_a, flock_b));
 
@@ -116,4 +114,5 @@ multiply(flock_b, add(flock_a, flock_a));
 
 我们已经看到函数式的点点星光了，但在真正开始我们的旅程之前，我们要先掌握一些具体的概念。
 
-[第 2 章：一等公民的函数](ch2.md)
+[第 2 章：一等公民的函数](../di-2-zhang-yi-deng-gong-min-de-han-shu/)
+

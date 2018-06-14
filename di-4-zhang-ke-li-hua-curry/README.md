@@ -2,7 +2,7 @@
 
 ## 不可或缺的 curry
 
-（译者注：原标题是“Can't live if livin' is without you”，为英国乐队 Badfinger 歌曲 *Without You* 中歌词。）
+（译者注：原标题是“Can't live if livin' is without you”，为英国乐队 Badfinger 歌曲 _Without You_ 中歌词。）
 
 我父亲以前跟我说过，有些事物在你得到之前是无足轻重的，得到之后就不可或缺了。微波炉是这样，智能手机是这样，互联网也是这样——老人们在没有互联网的时候过得也很充实。对我来说，函数的柯里化（curry）也是这样。
 
@@ -10,7 +10,7 @@ curry 的概念很简单：只传递给函数一部分参数来调用它，让�
 
 你可以一次性地调用 curry 函数，也可以每次只传一个参数分多次调用。
 
-```js
+```javascript
 var add = function(x) {
   return function(y) {
     return x + y;
@@ -31,7 +31,7 @@ addTen(2);
 
 我们来创建一些 curry 函数享受下（译者注：此处原文是“for our enjoyment”，语出自圣经）。
 
-```js
+```javascript
 var curry = require('lodash').curry;
 
 var match = curry(function(what, str) {
@@ -53,7 +53,7 @@ var map = curry(function(f, ary) {
 
 我在上面的代码中遵循的是一种简单，同时也非常重要的模式。即策略性地把要操作的数据（String， Array）放到最后一个参数里。到使用它们的时候你就明白这样做的原因是什么了。
 
-```js
+```javascript
 match(/\s+/g, "hello world");
 // [ ' ' ]
 
@@ -98,7 +98,7 @@ curry 的用处非常广泛，就像在 `hasSpaces`、`findSpaces` 和 `censored
 
 用 `map` 简单地把参数是单个元素的函数包裹一下，就能把它转换成参数为数组的函数。
 
-```js
+```javascript
 var getChildren = function(x) {
   return x.childNodes;
 };
@@ -106,9 +106,9 @@ var getChildren = function(x) {
 var allTheChildren = map(getChildren);
 ```
 
-只传给函数一部分参数通常也叫做*局部调用*（partial application），能够大量减少样板文件代码（boilerplate code）。考虑上面的 `allTheChildren` 函数，如果用 lodash 的普通 `map` 来写会是什么样的（注意参数的顺序也变了）：
+只传给函数一部分参数通常也叫做_局部调用_（partial application），能够大量减少样板文件代码（boilerplate code）。考虑上面的 `allTheChildren` 函数，如果用 lodash 的普通 `map` 来写会是什么样的（注意参数的顺序也变了）：
 
-```js
+```javascript
 var allTheChildren = function(elements) {
   return _.map(elements, getChildren);
 };
@@ -116,7 +116,7 @@ var allTheChildren = function(elements) {
 
 通常我们不定义直接操作数组的函数，因为只需内联调用 `map(getChildren)` 就能达到目的。这一点同样适用于 `sort`、`filter` 以及其他的高阶函数（higher order function）（高阶函数：参数或返回值为函数的函数）。
 
-当我们谈论*纯函数*的时候，我们说它们接受一个输入返回一个输出。curry 函数所做的正是这样：每传递一个参数调用函数，就返回一个新函数处理剩余的参数。这就是一个输入对应一个输出啊。
+当我们谈论_纯函数_的时候，我们说它们接受一个输入返回一个输出。curry 函数所做的正是这样：每传递一个参数调用函数，就返回一个新函数处理剩余的参数。这就是一个输入对应一个输出啊。
 
 哪怕输出是另一个函数，它也是纯函数。当然 curry 函数也允许一次传递多个参数，但这只是出于减少 `()` 的方便。
 
@@ -124,10 +124,9 @@ var allTheChildren = function(elements) {
 
 curry 函数用起来非常得心应手，每天使用它对我来说简直就是一种享受。它堪称手头必备工具，能够让函数式编程不那么繁琐和沉闷。
 
-通过简单地传递几个参数，就能动态创建实用的新函数；而且还能带来一个额外好处，那就是保留了数学的函数定义，尽管参数不止一个。
-下一章我们将学习另一个重要的工具：`组合`（compose）。
+通过简单地传递几个参数，就能动态创建实用的新函数；而且还能带来一个额外好处，那就是保留了数学的函数定义，尽管参数不止一个。 下一章我们将学习另一个重要的工具：`组合`（compose）。
 
-[第 5 章: 代码组合（compose）](ch5.md)
+[第 5 章: 代码组合（compose）](../di-5-zhang-dai-ma-zu-he-compose/)
 
 ## 练习
 
@@ -137,7 +136,7 @@ curry 函数用起来非常得心应手，每天使用它对我来说简直就�
 
 这些练习的答案可以在[本书仓库](https://github.com/llh911001/mostly-adequate-guide-chinese/tree/master/code/part1_exercises/answers)中找到。
 
-```js
+```javascript
 var _ = require('ramda');
 
 
@@ -192,3 +191,4 @@ var slice = undefined;
 // 借助 `slice` 定义一个 `take` curry 函数，该函数调用后可以取出字符串的前 n 个字符。
 var take = undefined;
 ```
+

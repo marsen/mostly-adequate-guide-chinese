@@ -1,6 +1,8 @@
-# Hindley-Milner 类型签名
+# 第 7 章: Hindley-Milner 类型签名
 
-## 初识类型
+## Hindley-Milner 类型签名
+
+### 初识类型
 
 刚接触函数式编程的人很容易深陷类型签名（type signatures）的泥淖。类型（type）是让所有不同背景的人都能高效沟通的元语言。很大程度上，类型签名是以 “Hindley-Milner” 系统写就的，本章我们将一起探究下这个系统。
 
@@ -10,11 +12,11 @@ JavaScript 是一种动态类型语言，但这并不意味着要一味否定类
 
 JavaScript 也有一些类型检查工具，比如 [Flow](http://flowtype.org/)，或者它的静态类型方言 [TypeScript](http://www.typescriptlang.org/) 。由于本书的目标是让读者能够熟练使用各种工具去书写函数式代码，所以我们将选择所有函数式语言都遵循的标准类型系统。
 
-## 神秘的传奇故事
+### 神秘的传奇故事
 
 从积尘已久的数学书，到浩如烟海的学术论文；从每周必读的博客文章，到源代码本身，我们都能发现 Hindley-Milner 类型签名的身影。Hindley-Milner 并不是一个复杂的系统，但还是需要一些解释和练习才能完全掌握这个小型语言的要义。
 
-```js
+```javascript
 //  capitalize :: String -> String
 var capitalize = function(s){
   return toUpperCase(head(s)) + toLowerCase(tail(s));
@@ -30,7 +32,7 @@ capitalize("smurf");
 
 再来看一些函数签名：
 
-```js
+```javascript
 //  strLength :: String -> Number
 var strLength = function(s){
   return s.length;
@@ -58,7 +60,7 @@ var replace = curry(function(reg, sub, s){
 
 对于 `match` 函数，我们完全可以把它的类型签名这样分组：
 
-```js
+```javascript
 //  match :: Regex -> (String -> [String])
 var match = curry(function(reg, s){
   return s.match(reg);
@@ -67,7 +69,7 @@ var match = curry(function(reg, s){
 
 是的，把最后两个类型包在括号里就能反映更多的信息了。现在我们可以看出 `match` 这个函数接受一个 `Regex` 作为参数，返回一个从 `String` 到 `[String]` 的函数。因为 curry，造成的结果就是这样：给 `match` 函数一个 `Regex`，得到一个新函数，能够处理其 `String` 参数。当然了，我们并非一定要这么看待这个过程，但这样思考有助于理解为何最后一个类型是返回值。
 
-```js
+```javascript
 //  match :: Regex -> (String -> [String])
 
 //  onHoliday :: String -> [String]
@@ -76,7 +78,7 @@ var onHoliday = match(/holiday/ig);
 
 每传一个参数，就会弹出类型签名最前面的那个类型。所以 `onHoliday` 就是已经有了 `Regex` 参数的 `match`。
 
-```js
+```javascript
 //  replace :: Regex -> (String -> (String -> String))
 var replace = curry(function(reg, sub, s){
   return s.replace(reg, sub);
@@ -87,7 +89,7 @@ var replace = curry(function(reg, sub, s){
 
 最后几点：
 
-```js
+```javascript
 //  id :: a -> a
 var id = function(x){ return x; }
 
@@ -107,7 +109,7 @@ var map = curry(function(f, xs){
 
 这里还有一些例子，你可以自己试试看能不能理解它们。
 
-```js
+```javascript
 //  head :: [a] -> a
 var head = function(xs){ return xs[0]; }
 
@@ -126,19 +128,19 @@ var reduce = curry(function(f, x, xs){
 
 不保证解释完全正确...（译者注：此处原文是“here goes nothing”，一般用于人们在做没有把握的事情之前说的话。）注意看 `reduce` 的签名，可以看到它的第一个参数是个函数，这个函数接受一个 `b` 和一个 `a` 并返回一个 `b`。那么这些 `a` 和 `b` 是从哪来的呢？很简单，签名中的第二个和第三个参数就是 `b` 和元素为 `a` 的数组，所以唯一合理的假设就是这里的 `b` 和每一个 `a` 都将传给前面说的函数作为参数。我们还可以看到，`reduce` 函数最后返回的结果是一个 `b`，也就是说，`reduce` 的第一个参数函数的输出就是 `reduce` 函数的输出。知道了 `reduce` 的含义，我们才敢说上面关于类型签名的推理是正确的。
 
-## 缩小可能性范围
+### 缩小可能性范围
 
-一旦引入一个类型变量，就会出现一个奇怪的特性叫做 *parametricity*（http://en.wikipedia.org/wiki/Parametricity ）。这个特性表明，函数将会*以一种统一的行为作用于所有的类型*。我们来研究下：
+一旦引入一个类型变量，就会出现一个奇怪的特性叫做 _parametricity_（[http://en.wikipedia.org/wiki/Parametricity](http://en.wikipedia.org/wiki/Parametricity) ）。这个特性表明，函数将会_以一种统一的行为作用于所有的类型_。我们来研究下：
 
-```js
+```javascript
 // head :: [a] -> a
 ```
 
-注意看 `head`，可以看到它接受 `[a]` 返回 `a`。我们除了知道参数是个`数组`，其他的一概不知；所以函数的功能就只限于操作这个数组上。在它对 `a` 一无所知的情况下，它可能对 `a` 做什么操作呢？换句话说，`a` 告诉我们它不是一个`特定`的类型，这意味着它可以是`任意`类型；那么我们的函数对*每一个*可能的类型的操作都必须保持统一。这就是 *parametricity* 的含义。要让我们来猜测 `head` 的实现的话，唯一合理的推断就是它返回数组的第一个，或者最后一个，或者某个随机的元素；当然，`head` 这个命名应该能给我们一些线索。
+注意看 `head`，可以看到它接受 `[a]` 返回 `a`。我们除了知道参数是个`数组`，其他的一概不知；所以函数的功能就只限于操作这个数组上。在它对 `a` 一无所知的情况下，它可能对 `a` 做什么操作呢？换句话说，`a` 告诉我们它不是一个`特定`的类型，这意味着它可以是`任意`类型；那么我们的函数对_每一个_可能的类型的操作都必须保持统一。这就是 _parametricity_ 的含义。要让我们来猜测 `head` 的实现的话，唯一合理的推断就是它返回数组的第一个，或者最后一个，或者某个随机的元素；当然，`head` 这个命名应该能给我们一些线索。
 
 再看一个例子：
 
-```js
+```javascript
 // reverse :: [a] -> [a]
 ```
 
@@ -146,11 +148,11 @@ var reduce = curry(function(f, x, xs){
 
 这种“可能性范围的缩小”（narrowing of possibility）允许我们利用类似 [Hoogle](https://www.haskell.org/hoogle) 这样的类型签名搜索引擎去搜索我们想要的函数。类型签名所能包含的信息量真的非常大。
 
-## 自由定理
+### 自由定理
 
-类型签名除了能够帮助我们推断函数可能的实现，还能够给我们带来*自由定理*（free theorems）。下面是两个直接从 [Wadler 关于此主题的论文](http://ttic.uchicago.edu/~dreyer/course/papers/wadler.pdf) 中随机选择的例子：
+类型签名除了能够帮助我们推断函数可能的实现，还能够给我们带来_自由定理_（free theorems）。下面是两个直接从 [Wadler 关于此主题的论文](http://ttic.uchicago.edu/~dreyer/course/papers/wadler.pdf) 中随机选择的例子：
 
-```js
+```javascript
 // head :: [a] -> a
 compose(f, head) == compose(head, map(f));
 
@@ -165,17 +167,18 @@ compose(map(f), filter(compose(p, f))) == compose(filter(p), map(f));
 第二个例子 `filter` 也是一样。等式左边是说，先组合 `f` 和 `p` 检查哪些元素要过滤掉，然后再通过 `map` 实际调用 `f`（别忘了 `filter` 是不会改变数组中元素的，这就保证了 `a` 将保持不变）；等式右边是说，先用 `map` 调用 `f`，然后再根据 `p` 过滤元素。这两者也是相等的。
 
 以上只是两个例子，但它们传达的定理却是普适的，可以应用到所有的多态性类型签名上。在 JavaScript 中，你可以借助一些工具来声明重写规则，也可以直接使用 `compose` 函数来定义重写规则。总之，这么做的好处是显而易见且唾手可得的，可能性则是无限的。
-# 类型约束
+
+## 类型约束
 
 最后要注意的一点是，签名也可以把类型约束为一个特定的接口（interface）。
 
-```js
+```javascript
 // sort :: Ord a => [a] -> [a]
 ```
 
-胖箭头左边表明的是这样一个事实：`a` 一定是个 `Ord` 对象。也就是说，`a` 必须要实现 `Ord` 接口。`Ord` 到底是什么？它是从哪来的？在一门强类型语言中，它可能就是一个自定义的接口，能够让不同的值排序。通过这种方式，我们不仅能够获取关于 `a` 的更多信息，了解 `sort` 函数具体要干什么，而且还能限制函数的作用范围。我们把这种接口声明叫做*类型约束*（type constraints）。
+胖箭头左边表明的是这样一个事实：`a` 一定是个 `Ord` 对象。也就是说，`a` 必须要实现 `Ord` 接口。`Ord` 到底是什么？它是从哪来的？在一门强类型语言中，它可能就是一个自定义的接口，能够让不同的值排序。通过这种方式，我们不仅能够获取关于 `a` 的更多信息，了解 `sort` 函数具体要干什么，而且还能限制函数的作用范围。我们把这种接口声明叫做_类型约束_（type constraints）。
 
-```js
+```javascript
 // assertEqual :: (Eq a, Show a) => a -> a -> Assertion
 ```
 
@@ -183,8 +186,9 @@ compose(map(f), filter(compose(p, f))) == compose(filter(p), map(f));
 
 我们将会在后面的章节中看到更多类型约束的例子，其含义也会更加清晰。
 
-## 总结
+### 总结
 
 Hindley-Milner 类型签名在函数式编程中无处不在，它们简单易读，写起来也不复杂。但仅仅凭签名就能理解整个程序还是有一定难度的，要想精通这个技能就更需要花点时间了。从这开始，我们将给每一行代码都加上类型签名。
 
-[第 8 章: 特百惠](ch8.md)
+[第 8 章: 特百惠](../di-8-zhang-te-bai-hui/)
+

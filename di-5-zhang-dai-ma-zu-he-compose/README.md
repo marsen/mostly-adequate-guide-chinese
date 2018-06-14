@@ -4,7 +4,7 @@
 
 这就是 `组合`（compose，以下将称之为组合）：
 
-```js
+```javascript
 var compose = function(f,g) {
   return function(x) {
     return f(g(x));
@@ -16,7 +16,7 @@ var compose = function(f,g) {
 
 `组合`看起来像是在饲养函数。你就是饲养员，选择两个有特点又遭你喜欢的函数，让它们结合，产下一个崭新的函数。组合的用法如下：
 
-```js
+```javascript
 var toUpperCase = function(x) { return x.toUpperCase(); };
 var exclaim = function(x) { return x + '!'; };
 var shout = compose(exclaim, toUpperCase);
@@ -29,7 +29,7 @@ shout("send in the clowns");
 
 在 `compose` 的定义中，`g` 将先于 `f` 执行，因此就创建了一个从右到左的数据流。这样做的可读性远远高于嵌套一大堆的函数调用，如果不用组合，`shout` 函数将会是这样的：
 
-```js
+```javascript
 var shout = function(x){
   return exclaim(toUpperCase(x));
 };
@@ -37,7 +37,7 @@ var shout = function(x){
 
 让代码从右向左运行，而不是由内而外运行，我觉得可以称之为“左倾”（吁——）。我们来看一个顺序很重要的例子：
 
-```js
+```javascript
 var head = function(x) { return x[0]; };
 var reverse = reduce(function(acc, x){ return [x].concat(acc); }, []);
 var last = compose(head, reverse);
@@ -48,7 +48,7 @@ last(['jumpkick', 'roundhouse', 'uppercut']);
 
 `reverse` 反转列表，`head` 取列表中的第一个元素；所以结果就是得到了一个 `last` 函数（译者注：即取列表的最后一个元素），虽然它性能不高。这个组合中函数的执行顺序应该是显而易见的。尽管我们可以定义一个从左向右的版本，但是从右向左执行更加能够反映数学上的含义——是的，组合的概念直接来自于数学课本。实际上，现在是时候去看看所有的组合都有的一个特性了。
 
-```js
+```javascript
 // 结合律（associativity）
 var associative = compose(f, compose(g, h)) == compose(compose(f, g), h);
 // true
@@ -56,7 +56,7 @@ var associative = compose(f, compose(g, h)) == compose(compose(f, g), h);
 
 这个特性就是结合律，符合结合律意味着不管你是把 `g` 和 `h` 分到一组，还是把 `f` 和 `g` 分到一组都不重要。所以，如果我们想把字符串变为大写，可以这么写：
 
-```js
+```javascript
 compose(toUpperCase, compose(head, reverse));
 
 // 或者
@@ -65,7 +65,7 @@ compose(compose(toUpperCase, head), reverse);
 
 因为如何为 `compose` 的调用分组不重要，所以结果都是一样的。这也让我们有能力写一个可变的组合（variadic compose），用法如下：
 
-```js
+```javascript
 // 前面的例子中我们必须要写两个组合才行，但既然组合是符合结合律的，我们就可以只写一个，
 // 而且想传给它多少个函数就传给它多少个，然后让它自己决定如何分组。
 
@@ -81,11 +81,11 @@ loudLastUpper(['jumpkick', 'roundhouse', 'uppercut']);
 //=> 'UPPERCUT!'
 ```
 
-运用结合律能为我们带来强大的灵活性，还有对执行结果不会出现意外的那种平和心态。至于稍微复杂些的可变组合，也都包含在本书的 `support` 库里了，而且你也可以在类似 [lodash][lodash-website]、[underscore][underscore-website] 以及 [ramda][ramda-website] 这样的类库中找到它们的常规定义。
+运用结合律能为我们带来强大的灵活性，还有对执行结果不会出现意外的那种平和心态。至于稍微复杂些的可变组合，也都包含在本书的 `support` 库里了，而且你也可以在类似 [lodash](https://lodash.com/)、[underscore](http://underscorejs.org/) 以及 [ramda](http://ramdajs.com/) 这样的类库中找到它们的常规定义。
 
 结合律的一大好处是任何一个函数分组都可以被拆开来，然后再以它们自己的组合方式打包在一起。让我们来重构重构前面的例子：
 
-```js
+```javascript
 var loudLastUpper = compose(exclaim, toUpperCase, head, reverse);
 
 // 或
@@ -100,13 +100,13 @@ var loudLastUpper = compose(angry, last);
 // 更多变种...
 ```
 
-关于如何组合，并没有标准的答案——我们只是以自己喜欢的方式搭乐高积木罢了。通常来说，最佳实践是让组合可重用，就像 `last` 和 `angry` 那样。如果熟悉 Fowler 的《[重构][refactoring-book]》一书的话，你可能会认识到这个过程叫做 “[extract method][extract-method-refactor]”——只不过不需要关心对象的状态。
+关于如何组合，并没有标准的答案——我们只是以自己喜欢的方式搭乐高积木罢了。通常来说，最佳实践是让组合可重用，就像 `last` 和 `angry` 那样。如果熟悉 Fowler 的《[重构](http://martinfowler.com/books/refactoring.html)》一书的话，你可能会认识到这个过程叫做 “[extract method](http://refactoring.com/catalog/extractMethod.html)”——只不过不需要关心对象的状态。
 
 ## pointfree
 
-pointfree 模式指的是，永远不必说出你的数据。咳咳对不起（译者注：此处原文是“Pointfree style means never having to say your data”，源自 1970 年的电影 *Love Story* 里的一句著名台词“Love means never having to say you're sorry”。紧接着作者又说了一句“Excuse me”，大概是一种幽默）。它的意思是说，函数无须提及将要操作的数据是什么样的。一等公民的函数、柯里化（curry）以及组合协作起来非常有助于实现这种模式。
+pointfree 模式指的是，永远不必说出你的数据。咳咳对不起（译者注：此处原文是“Pointfree style means never having to say your data”，源自 1970 年的电影 _Love Story_ 里的一句著名台词“Love means never having to say you're sorry”。紧接着作者又说了一句“Excuse me”，大概是一种幽默）。它的意思是说，函数无须提及将要操作的数据是什么样的。一等公民的函数、柯里化（curry）以及组合协作起来非常有助于实现这种模式。
 
-```js
+```javascript
 // 非 pointfree，因为提到了数据：word
 var snakeCase = function (word) {
   return word.toLowerCase().replace(/\s+/ig, '_');
@@ -120,7 +120,7 @@ var snakeCase = compose(replace(/\s+/ig, '_'), toLowerCase);
 
 我们再来看一个例子。
 
-```js
+```javascript
 // 非 pointfree，因为提到了数据：name
 var initials = function (name) {
   return name.split(' ').map(compose(toUpperCase, head)).join('. ');
@@ -139,7 +139,7 @@ initials("hunter stockton thompson");
 
 组合的一个常见错误是，在没有局部调用之前，就组合类似 `map` 这样接受两个参数的函数。
 
-```js
+```javascript
 // 错误做法：我们传给了 `angry` 一个数组，根本不知道最后传给 `map` 的是什么东西。
 var latin = compose(map, angry, reverse);
 
@@ -156,7 +156,7 @@ latin(["frog", "eyes"]);
 
 如果在 debug 组合的时候遇到了困难，那么可以使用下面这个实用的，但是不纯的 `trace` 函数来追踪代码的执行情况。
 
-```js
+```javascript
 var trace = curry(function(tag, x){
   console.log(tag, x);
   return x;
@@ -170,14 +170,14 @@ dasherize('The world is a vampire');
 
 这里报错了，来 `trace` 下：
 
-```js
+```javascript
 var dasherize = compose(join('-'), toLower, trace("after split"), split(' '), replace(/\s{2,}/ig, ' '));
 // after split [ 'The', 'world', 'is', 'a', 'vampire' ]
 ```
 
 啊！`toLower` 的参数是一个数组，所以需要先用 `map` 调用一下它。
 
-```js
+```javascript
 var dasherize = compose(join('-'), map(toLower), split(' '), replace(/\s{2,}/ig, ' '));
 
 dasherize('The world is a vampire');
@@ -193,16 +193,16 @@ dasherize('The world is a vampire');
 
 范畴学（category theory）是数学中的一个抽象分支，能够形式化诸如集合论（set theory）、类型论（type theory）、群论（group theory）以及逻辑学（logic）等数学分支中的一些概念。范畴学主要处理对象（object）、态射（morphism）和变化式（transformation），而这些概念跟编程的联系非常紧密。下图是一些相同的概念分别在不同理论下的形式：
 
-<img src="images/cat_theory.png" />
+![](../.gitbook/assets/cat_theory.png)
 
 抱歉，我没有任何要吓唬你的意思。我并不假设你对这些概念都了如指掌，我只是想让你明白这里面有多少重复的内容，让你知道为何范畴学要统一这些概念。
 
 在范畴学中，有一个概念叫做...范畴。有着以下这些组件（component）的搜集（collection）就构成了一个范畴：
 
-  * 对象的搜集
-  * 态射的搜集
-  * 态射的组合
-  * identity 这个独特的态射
+* 对象的搜集
+* 态射的搜集
+* 态射的组合
+* identity 这个独特的态射
 
 范畴学抽象到足以模拟任何事物，不过目前我们最关心的还是类型和函数，所以让我们把范畴学运用到它们身上看看。
 
@@ -220,12 +220,11 @@ dasherize('The world is a vampire');
 
 这张图展示了什么是组合：
 
-<img src="images/cat_comp1.png" />
-<img src="images/cat_comp2.png" />
+![](../.gitbook/assets/cat_comp1.png) ![](../.gitbook/assets/cat_comp2.png)
 
 这里有一个具体的例子：
 
-```js
+```javascript
 var g = function(x){ return x.length; };
 var f = function(x){ return x === 4; };
 var isFourLetterWord = compose(f, g);
@@ -235,7 +234,7 @@ var isFourLetterWord = compose(f, g);
 
 让我们介绍一个名为 `id` 的实用函数。这个函数接受随便什么输入然后原封不动地返回它：
 
-```js
+```javascript
 var id = function(x){ return x; };
 ```
 
@@ -243,7 +242,7 @@ var id = function(x){ return x; };
 
 `id` 函数跟组合一起使用简直完美。下面这个特性对所有的一元函数（unary function）（一元函数：只接受一个参数的函数） `f` 都成立：
 
-```js
+```javascript
 // identity
 compose(id, f) == compose(f, id) == f;
 // true
@@ -263,11 +262,11 @@ compose(id, f) == compose(f, id) == f;
 
 现在我们已经有足够的知识去进行一些实际的练习了，让我们来编写一个示例应用。
 
-[第 6 章: 示例应用](ch6.md)
+[第 6 章: 示例应用](../di-6-zhang-shi-li-ying-yong/)
 
 ## 练习
 
-```js
+```javascript
 require('../../support');
 var _ = require('ramda');
 var accounting = require('accounting');
@@ -339,8 +338,3 @@ var fastestCar = function(cars) {
 };
 ```
 
-[lodash-website]: https://lodash.com/
-[underscore-website]: http://underscorejs.org/
-[ramda-website]: http://ramdajs.com/
-[refactoring-book]: http://martinfowler.com/books/refactoring.html
-[extract-method-refactor]: http://refactoring.com/catalog/extractMethod.html

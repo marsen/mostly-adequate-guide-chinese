@@ -6,7 +6,7 @@
 
 这是 JavaScript 语言的基础概念，不过还是值得提一提的，因为在 Github 上随便一搜就能看到对这个概念的集体无视，或者也可能是无知。我们来看一个杜撰的例子：
 
-```js
+```javascript
 var hi = function(name){
   return "Hi " + name;
 };
@@ -16,9 +16,9 @@ var greeting = function(name) {
 };
 ```
 
-这里 `greeting` 指向的那个把 `hi` 包了一层的包裹函数完全是多余的。为什么？因为 JavaScript 的函数是*可调用*的，当 `hi` 后面紧跟 `()` 的时候就会运行并返回一个值；如果没有 `()`，`hi` 就简单地返回存到这个变量里的函数。我们来确认一下：
+这里 `greeting` 指向的那个把 `hi` 包了一层的包裹函数完全是多余的。为什么？因为 JavaScript 的函数是_可调用_的，当 `hi` 后面紧跟 `()` 的时候就会运行并返回一个值；如果没有 `()`，`hi` 就简单地返回存到这个变量里的函数。我们来确认一下：
 
-```js
+```javascript
 hi;
 // function(name){
 //  return "Hi " + name
@@ -30,7 +30,7 @@ hi("jonas");
 
 `greeting` 只不过是转了个身然后以相同的参数调用了 `hi` 函数而已，因此我们可以这么写：
 
-```js
+```javascript
 var greeting = hi;
 
 
@@ -44,7 +44,7 @@ greeting("times");
 
 充分理解这个问题对读懂本书后面的内容至关重要，所以我们再来看几个例子。以下代码都来自 npm 上的模块包：
 
-```js
+```javascript
 // 太傻了
 var getServerStuff = function(callback){
   return ajaxCall(function(json){
@@ -58,7 +58,7 @@ var getServerStuff = ajaxCall;
 
 世界上到处都充斥着这样的垃圾 ajax 代码。以下是上述两种写法等价的原因：
 
-```js
+```javascript
 // 这行
 return ajaxCall(function(json){
   return callback(json);
@@ -78,7 +78,7 @@ var getServerStuff = ajaxCall; // <-- 看，没有括号哦
 
 各位，以上才是写函数的正确方式。一会儿再告诉你为何我对此如此执着。
 
-```js
+```javascript
 var BlogController = (function() {
   var index = function(posts) {
     return Views.index(posts);
@@ -106,7 +106,7 @@ var BlogController = (function() {
 
 这个可笑的控制器（controller）99% 的代码都是垃圾。我们可以把它重写成这样：
 
-```js
+```javascript
 var BlogController = {index: Views.index, show: Views.show, create: Db.create, update: Db.update, destroy: Db.destroy};
 ```
 
@@ -118,7 +118,7 @@ var BlogController = {index: Views.index, show: Views.show, create: Db.create, u
 
 另外，如果一个函数被不必要地包裹起来了，而且发生了改动，那么包裹它的那个函数也要做相应的变更。
 
-```js
+```javascript
 httpGet('/post/2', function(json){
   return renderPost(json);
 });
@@ -126,7 +126,7 @@ httpGet('/post/2', function(json){
 
 如果 `httpGet` 要改成可以抛出一个可能出现的 `err` 异常，那我们还要回过头去把“胶水”函数也改了。
 
-```js
+```javascript
 // 把整个应用里的所有 httpGet 调用都改成这样，可以传递 err 参数。
 httpGet('/post/2', function(json, err){
   return renderPost(json, err);
@@ -135,7 +135,7 @@ httpGet('/post/2', function(json, err){
 
 写成一等公民函数的形式，要做的改动将会少得多：
 
-```js
+```javascript
 httpGet('/post/2', renderPost);  // renderPost 将会在 httpGet 中调用，想要多少参数都行
 ```
 
@@ -143,7 +143,7 @@ httpGet('/post/2', renderPost);  // renderPost 将会在 httpGet 中调用，想
 
 项目中常见的一种造成混淆的原因是，针对同一个概念使用不同的命名。还有通用代码的问题。比如，下面这两个函数做的事情一模一样，但后一个就显得更加通用，可重用性也更高：
 
-```js
+```javascript
 // 只针对当前的博客
 var validArticles = function(articles) {
   return articles.filter(function(article){
@@ -163,7 +163,7 @@ var compact = function(xs) {
 
 有一点我必须得指出，你一定要非常小心 `this` 值，别让它反咬你一口，这一点与面向对象代码类似。如果一个底层函数使用了 `this`，而且是以一等公民的方式被调用的，那你就等着 JS 这个蹩脚的抽象概念发怒吧。
 
-```js
+```javascript
 var fs = require('fs');
 
 // 太可怕了
@@ -171,7 +171,6 @@ fs.readFile('freaky_friday.txt', Db.save);
 
 // 好一点点
 fs.readFile('freaky_friday.txt', Db.save.bind(Db));
-
 ```
 
 把 Db 绑定（bind）到它自己身上以后，你就可以随心所欲地调用它的原型链式垃圾代码了。`this` 就像一块脏尿布，我尽可能地避免使用它，因为在函数式编程中根本用不到它。然而，在使用其他的类库时，你却不得不向这个疯狂的世界低头。
@@ -180,4 +179,5 @@ fs.readFile('freaky_friday.txt', Db.save.bind(Db));
 
 至此，我们才准备好继续后面的章节。
 
-[第 3 章: 纯函数的好处](ch3.md)
+[第 3 章: 纯函数的好处](../di-3-zhang-chun-han-shu-de-hao-chu/)
+

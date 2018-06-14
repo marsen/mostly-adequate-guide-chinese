@@ -1,16 +1,16 @@
-# 特百惠
+# 第 8 章: 特百惠
 
 （译者注：特百惠是美国家居用品品牌，代表产品是塑料容器。）
 
 ## 强大的容器
 
-<img src="images/jar.jpg" alt="http://blog.dwinegar.com/2011/06/another-jar.html" />
+![http://blog.dwinegar.com/2011/06/another-jar.html](../.gitbook/assets/jar.jpg)
 
 我们已经知道如何书写函数式的程序了，即通过管道把数据在一系列纯函数间传递的程序。我们也知道了，这些程序就是声明式的行为规范。但是，控制流（control flow）、异常处理（error handling）、异步操作（asynchronous actions）和状态（state）呢？还有更棘手的作用（effects）呢？本章将对上述这些抽象概念赖以建立的基础作一番探究。
 
 首先我们将创建一个容器（container）。这个容器必须能够装载任意类型的值；否则的话，像只能装木薯布丁的密封塑料袋是没什么用的。这个容器将会是一个对象，但我们不会为它添加面向对象观念下的属性和方法。是的，我们将把它当作一个百宝箱——一个存放宝贵的数据的特殊盒子。
 
-```js
+```javascript
 var Container = function(x) {
   this.__value = x;
 }
@@ -22,7 +22,7 @@ Container.of = function(x) { return new Container(x); };
 
 我们来检验下这个崭新的盒子：
 
-```js
+```javascript
 Container.of(3)
 //=> Container(3)
 
@@ -41,7 +41,7 @@ Container.of(Container.of({name: "yoda"}))
 
 * `Container` 是个只有一个属性的对象。尽管容器可以有不止一个的属性，但大多数容器还是只有一个。我们很随意地把 `Container` 的这个属性命名为 `__value`。
 * `__value` 不能是某个特定的类型，不然 `Container` 就对不起它这个名字了。
-* 数据一旦存放到 `Container`，就会一直待在那儿。我们*可以*用 `.__value` 获取到数据，但这样做有悖初衷。
+* 数据一旦存放到 `Container`，就会一直待在那儿。我们_可以_用 `.__value` 获取到数据，但这样做有悖初衷。
 
 如果把容器想象成玻璃罐的话，上面这三条陈述的理由就会比较清晰了。但是暂时，请先保持耐心。
 
@@ -49,7 +49,7 @@ Container.of(Container.of({name: "yoda"}))
 
 一旦容器里有了值，不管这个值是什么，我们就需要一种方法来让别的函数能够操作它。
 
-```js
+```javascript
 // (a -> b) -> Container a -> Container b
 Container.prototype.map = function(f){
   return Container.of(f(this.__value))
@@ -58,7 +58,7 @@ Container.prototype.map = function(f){
 
 这个 `map` 跟数组那个著名的 `map` 一样，除了前者的参数是 `Container a` 而后者是 `[a]`。它们的使用方式也几乎一致：
 
-```js
+```javascript
 Container.of(2).map(function(two){ return two + 2 })
 //=> Container(4)
 
@@ -73,21 +73,21 @@ Container.of("bombs").map(concat(' away')).map(_.prop('length'))
 
 为什么要使用这样一种方法？因为我们能够在不离开 `Container` 的情况下操作容器里面的值。这是非常了不起的一件事情。`Container` 里的值传递给 `map` 函数之后，就可以任我们操作；操作结束后，为了防止意外再把它放回它所属的 `Container`。这样做的结果是，我们能连续地调用 `map`，运行任何我们想运行的函数。甚至还可以改变值的类型，就像上面最后一个例子中那样。
 
-等等，如果我们能一直调用 `map`，那它不就是个组合（composition）么！这里边是有什么数学魔法在起作用？是 *functor*。各位，这个数学魔法就是 *functor*。
+等等，如果我们能一直调用 `map`，那它不就是个组合（composition）么！这里边是有什么数学魔法在起作用？是 _functor_。各位，这个数学魔法就是 _functor_。
 
 > functor 是实现了 `map` 函数并遵守一些特定规则的容器类型。
 
-没错，*functor* 就是一个签了合约的接口。我们本来可以简单地把它称为 `Mappable`，但这样就没有 *fun*（译者注：指 `functor` 中包含 `fun` 这个单词，是一双关语）了，对吧？functor 是范畴学里的概念，我们将在本章末尾详细探索与此相关的数学知识；暂时我们先用这个名字很奇怪的接口做一些不那么理论的、实用性的练习。
+没错，_functor_ 就是一个签了合约的接口。我们本来可以简单地把它称为 `Mappable`，但这样就没有 _fun_（译者注：指 `functor` 中包含 `fun` 这个单词，是一双关语）了，对吧？functor 是范畴学里的概念，我们将在本章末尾详细探索与此相关的数学知识；暂时我们先用这个名字很奇怪的接口做一些不那么理论的、实用性的练习。
 
 把值装进一个容器，而且只能使用 `map` 来处理它，这么做的理由到底是什么呢？如果我们换种方式来问，答案就很明显了：让容器自己去运用函数能给我们带来什么好处？答案是抽象，对于函数运用的抽象。当 `map` 一个函数的时候，我们请求容器来运行这个函数。不夸张地讲，这是一种十分强大的理念。
 
 ## 薛定谔的 Maybe
 
-<img src="images/cat.png" alt="cool cat, need reference" />
+![cool cat, need reference](../.gitbook/assets/cat.png)
 
 说实话 `Container` 挺无聊的，而且通常我们称它为 `Identity`，与 `id` 函数的作用相同（这里也是有数学上的联系的，我们会在适当时候加以说明）。除此之外，还有另外一种 functor，那就是实现了 `map` 函数的类似容器的数据类型，这种 functor 在调用 `map` 的时候能够提供非常有用的行为。现在让我们来定义一个这样的 functor。
 
-```js
+```javascript
 var Maybe = function(x) {
   this.__value = x;
 }
@@ -107,7 +107,7 @@ Maybe.prototype.map = function(f) {
 
 `Maybe` 看起来跟 `Container` 非常类似，但是有一点不同：`Maybe` 会先检查自己的值是否为空，然后才调用传进来的函数。这样我们在使用 `map` 的时候就能避免恼人的空值了（注意这个实现出于教学目的做了简化）。
 
-```js
+```javascript
 Maybe.of("Malkovich Malkovich").map(match(/a/ig));
 //=> Maybe(['a', 'a'])
 
@@ -125,7 +125,7 @@ Maybe.of({name: "Dinah", age: 14}).map(_.prop("age")).map(add(10));
 
 这种点记法（dot notation syntax）已经足够函数式了，但是正如在第 1 部分指出的那样，我们更想保持一种 pointfree 的风格。碰巧的是，`map` 完全有能力以 curry 函数的方式来“代理”任何 functor：
 
-```js
+```javascript
 //  map :: Functor f => (a -> b) -> f a -> f b
 var map = curry(function(f, any_functor_at_all) {
   return any_functor_at_all.map(f);
@@ -138,7 +138,7 @@ var map = curry(function(f, any_functor_at_all) {
 
 实际当中，`Maybe` 最常用在那些可能会无法成功返回结果的函数中。
 
-```js
+```javascript
 //  safeHead :: [a] -> Maybe(a)
 var safeHead = function(xs) {
   return Maybe.of(xs[0]);
@@ -153,11 +153,11 @@ streetName({addresses: [{street: "Shady Ln.", number: 4201}]});
 // Maybe("Shady Ln.")
 ```
 
-`safeHead` 与一般的 `_.head` 类似，但是增加了类型安全保证。引入 `Maybe` 会发生一件非常有意思的事情，那就是我们被迫要与狡猾的 `null` 打交道了。`safeHead` 函数能够诚实地预告它可能的失败——失败真没什么可耻的——然后返回一个 `Maybe` 来通知我们相关信息。实际上不仅仅是*通知*，因为毕竟我们想要的值深藏在 `Maybe` 对象中，而且只能通过 `map` 来操作它。本质上，这是一种由 `safeHead` 强制执行的空值检查。有了这种检查，我们才能在夜里安然入睡，因为我们知道最不受人待见的 `null` 不会突然出现。类似这样的 API 能够把一个像纸糊起来的、脆弱的应用升级为实实在在的、健壮的应用，这样的 API 保证了更加安全的软件。
+`safeHead` 与一般的 `_.head` 类似，但是增加了类型安全保证。引入 `Maybe` 会发生一件非常有意思的事情，那就是我们被迫要与狡猾的 `null` 打交道了。`safeHead` 函数能够诚实地预告它可能的失败——失败真没什么可耻的——然后返回一个 `Maybe` 来通知我们相关信息。实际上不仅仅是_通知_，因为毕竟我们想要的值深藏在 `Maybe` 对象中，而且只能通过 `map` 来操作它。本质上，这是一种由 `safeHead` 强制执行的空值检查。有了这种检查，我们才能在夜里安然入睡，因为我们知道最不受人待见的 `null` 不会突然出现。类似这样的 API 能够把一个像纸糊起来的、脆弱的应用升级为实实在在的、健壮的应用，这样的 API 保证了更加安全的软件。
 
 有时候函数可以明确返回一个 `Maybe(null)` 来表明失败，例如：
 
-```js
+```javascript
 //  withdraw :: Number -> Account -> Maybe(Account)
 var withdraw = curry(function(amount, account) {
   return account.balance >= amount ?
@@ -189,7 +189,7 @@ getTwenty({ balance: 10.00});
 
 不过，对容器里的值来说，还是有个逃生口可以出去。也就是说，如果我们想返回一个自定义的值然后还能继续执行后面的代码的话，是可以做到的；要达到这一目的，可以借助一个帮助函数 `maybe`：
 
-```js
+```javascript
 //  maybe :: b -> (a -> b) -> Maybe a -> b
 var maybe = curry(function(x, f, m) {
   return m.isNothing() ? x : f(m.__value);
@@ -218,11 +218,11 @@ getTwenty({ balance: 10.00});
 
 ## “纯”错误处理
 
-<img src="images/fists.jpg" alt="pick a hand... need a reference" />
+![pick a hand... need a reference](../.gitbook/assets/fists.jpg)
 
 说出来可能会让你震惊，`throw/catch` 并不十分“纯”。当一个错误抛出的时候，我们没有收到返回值，反而是得到了一个警告！抛错的函数吐出一大堆的 0 和 1 作为盾和矛来攻击我们，简直就像是在反击输入值的入侵而进行的一场电子大作战。有了 `Either` 这个新朋友，我们就能以一种比向输入值宣战好得多的方式来处理错误，那就是返回一条非常礼貌的消息作为回应。我们来看一下：
 
-```js
+```javascript
 var Left = function(x) {
   this.__value = x;
 }
@@ -250,7 +250,7 @@ Right.prototype.map = function(f) {
 
 `Left` 和 `Right` 是我们称之为 `Either` 的抽象类型的两个子类。我略去了创建 `Either` 父类的繁文缛节，因为我们不会用到它的，但你了解一下也没坏处。注意看，这里除了有两个类型，没别的新鲜东西。来看看它们是怎么运行的：
 
-```js
+```javascript
 Right.of("rain").map(function(str){ return "b"+str; });
 // Right("brain")
 
@@ -268,7 +268,7 @@ Left.of("rolls eyes...").map(_.prop("host"));
 
 假设有一个可能会失败的函数，就拿根据生日计算年龄来说好了。的确，我们可以用 `Maybe(null)` 来表示失败并把程序引向另一个分支，但是这并没有告诉我们太多信息。很有可能我们想知道失败的原因是什么。用 `Either` 写一个这样的程序看看：
 
-```js
+```javascript
 var moment = require('moment');
 
 //  getAge :: Date -> User -> Either(String, Number)
@@ -287,7 +287,7 @@ getAge(moment(), {birthdate: 'balloons!'});
 
 这么一来，就像 `Maybe(null)`，当返回一个 `Left` 的时候就直接让程序短路。跟 `Maybe(null)` 不同的是，现在我们对程序为何脱离原先轨道至少有了一点头绪。有一件事要注意，这里返回的是 `Either(String, Number)`，意味着我们这个 `Either` 左边的值是 `String`，右边（译者注：也就是正确的值）的值是 `Number`。这个类型签名不是很正式，因为我们并没有定义一个真正的 `Either` 父类；但我们还是从这个类型那里了解到不少东西。它告诉我们，我们得到的要么是一条错误消息，要么就是正确的年龄值。
 
-```js
+```javascript
 //  fortune :: Number -> String
 var fortune  = compose(concat("If you survive, you will be "), add(1));
 
@@ -306,15 +306,15 @@ zoltar({birthdate: 'balloons!'});
 
 在这个例子中，我们根据 `birthdate` 的合法性来控制代码的逻辑分支，同时又让代码进行从右到左的直线运动，而不用爬过各种条件语句的大括号。通常，我们不会把 `console.log` 放到 `zoltar` 函数里，而是在调用 `zoltar` 的时候才 `map` 它，不过本例中，让你看看 `Right` 分支如何与 `Left` 不同也是很有帮助的。我们在 `Right` 分支的类型签名中使用 `_` 表示一个应该忽略的值（在有些浏览器中，你必须要 `console.log.bind(console)` 才能把 `console.log` 当作一等公民使用）。
 
-我想借此机会指出一件你可能没注意到的事：这个例子中，尽管 `fortune` 使用了 `Either`，它对每一个 functor 到底要干什么却是毫不知情的。前面例子中的 `finishTransaction` 也是一样。通俗点来讲，一个函数在调用的时候，如果被 `map` 包裹了，那么它就会从一个非 functor 函数转换为一个 functor 函数。我们把这个过程叫做 *lift*。一般情况下，普通函数更适合操作普通的数据类型而不是容器类型，在必要的时候再通过 *lift* 变为合适的容器去操作容器类型。这样做的好处是能得到更简单、重用性更高的函数，它们能够随需求而变，兼容任意 functor。
+我想借此机会指出一件你可能没注意到的事：这个例子中，尽管 `fortune` 使用了 `Either`，它对每一个 functor 到底要干什么却是毫不知情的。前面例子中的 `finishTransaction` 也是一样。通俗点来讲，一个函数在调用的时候，如果被 `map` 包裹了，那么它就会从一个非 functor 函数转换为一个 functor 函数。我们把这个过程叫做 _lift_。一般情况下，普通函数更适合操作普通的数据类型而不是容器类型，在必要的时候再通过 _lift_ 变为合适的容器去操作容器类型。这样做的好处是能得到更简单、重用性更高的函数，它们能够随需求而变，兼容任意 functor。
 
 `Either` 并不仅仅只对合法性检查这种一般性的错误作用非凡，对一些更严重的、能够中断程序执行的错误比如文件丢失或者 socket 连接断开等，`Either` 同样效果显著。你可以试试把前面例子中的 `Maybe` 替换为 `Either`，看怎么得到更好的反馈。
 
-此刻我忍不住在想，我仅仅是把 `Either` 当作一个错误消息的容器介绍给你！这样的介绍有失偏颇，它的能耐远不止于此。比如，它表示了逻辑或（也就是 `||`）。再比如，它体现了范畴学里 *coproduct* 的概念，当然本书不会涉及这方面的知识，但值得你去深入了解，因为这个概念有很多特性值得利用。还比如，它是标准的 sum type（或者叫不交并集，disjoint union of sets），因为它含有的所有可能的值的总数就是它包含的那两种类型的总数（我知道这么说你听不懂，没关系，这里有一篇[非常棒的文章](https://www.fpcomplete.com/school/to-infinity-and-beyond/pick-of-the-week/sum-types)讲述这个问题）。`Either` 能做的事情多着呢，但是作为一个 functor，我们就用它处理错误。
+此刻我忍不住在想，我仅仅是把 `Either` 当作一个错误消息的容器介绍给你！这样的介绍有失偏颇，它的能耐远不止于此。比如，它表示了逻辑或（也就是 `||`）。再比如，它体现了范畴学里 _coproduct_ 的概念，当然本书不会涉及这方面的知识，但值得你去深入了解，因为这个概念有很多特性值得利用。还比如，它是标准的 sum type（或者叫不交并集，disjoint union of sets），因为它含有的所有可能的值的总数就是它包含的那两种类型的总数（我知道这么说你听不懂，没关系，这里有一篇[非常棒的文章](https://www.fpcomplete.com/school/to-infinity-and-beyond/pick-of-the-week/sum-types)讲述这个问题）。`Either` 能做的事情多着呢，但是作为一个 functor，我们就用它处理错误。
 
 就像 `Maybe` 可以有个 `maybe` 一样，`Either` 也可以有一个 `either`。两者的用法类似，但 `either` 接受两个函数（而不是一个）和一个静态值为参数。这两个函数的返回值类型一致：
 
-```js
+```javascript
 //  either :: (a -> c) -> (b -> c) -> Either a b -> c
 var either = curry(function(f, g, e) {
   switch(e.constructor) {
@@ -341,11 +341,11 @@ zoltar({birthdate: 'balloons!'});
 
 （译者注：原标题是“Old McDonald had Effects...”，源于美国儿歌“Old McDonald Had a Farm”。）
 
-<img src="images/dominoes.jpg" alt="dominoes.. need a reference" />
+![dominoes.. need a reference](../.gitbook/assets/dominoes.jpg)
 
 在关于纯函数的的那一章（即第 3 章）里，有一个很奇怪的例子。这个例子中的函数会产生副作用，但是我们通过把它包裹在另一个函数里的方式把它变得看起来像一个纯函数。这里还有一个类似的例子：
 
-```js
+```javascript
 //  getFromStorage :: String -> (_ -> String)
 var getFromStorage = function(key) {
   return function() {
@@ -358,7 +358,7 @@ var getFromStorage = function(key) {
 
 然而，这并没有多大的用处，你说是不是。就像是你收藏的全新未拆封的玩偶，不能拿出来玩有什么意思。所以要是能有办法进到这个容器里面，拿到它藏在那儿的东西就好了...办法是有的，请看 `IO`：
 
-```js
+```javascript
 var IO = function(f) {
   this.__value = f;
 }
@@ -378,7 +378,7 @@ IO.prototype.map = function(f) {
 
 来用用看：
 
-```js
+```javascript
 //  io_window_ :: IO Window
 var io_window = new IO(function(){ return window; });
 
@@ -398,14 +398,13 @@ $('#myDiv').map(head).map(function(div){ return div.innerHTML; });
 // IO('I am some inner html')
 ```
 
-这里，`io_window` 是一个真正的 `IO`，我们可以直接对它使用 `map`。至于 `$`，则是一个函数，调用后会返回一个 `IO`。我把这里的返回值都写成了*概念性*的，这样就更加直观；不过实际的返回值是 `{ __value: [Function] }`。当调用 `IO` 的 `map` 的时候，我们把传进来的函数放在了 `map` 函数里的组合的最末端（也就是最左边），反过来这个函数就成为了新的 `IO` 的新 `__value`，并继续下去。传给 `map` 的函数并没有运行，我们只是把它们压到一个“运行栈”的最末端而已，一个函数紧挨着另一个函数，就像小心摆放的多米诺骨牌一样，让人不敢轻易推倒。这种情形很容易叫人联想起“四人帮”（译者注：《设计模式》一书作者）提出的命令模式（command pattern）或者队列（queue）。
+这里，`io_window` 是一个真正的 `IO`，我们可以直接对它使用 `map`。至于 `$`，则是一个函数，调用后会返回一个 `IO`。我把这里的返回值都写成了_概念性_的，这样就更加直观；不过实际的返回值是 `{ __value: [Function] }`。当调用 `IO` 的 `map` 的时候，我们把传进来的函数放在了 `map` 函数里的组合的最末端（也就是最左边），反过来这个函数就成为了新的 `IO` 的新 `__value`，并继续下去。传给 `map` 的函数并没有运行，我们只是把它们压到一个“运行栈”的最末端而已，一个函数紧挨着另一个函数，就像小心摆放的多米诺骨牌一样，让人不敢轻易推倒。这种情形很容易叫人联想起“四人帮”（译者注：《设计模式》一书作者）提出的命令模式（command pattern）或者队列（queue）。
 
 花点时间找回你关于 functor 的直觉吧。把实现细节放在一边不管，你应该就能自然而然地对各种各样的容器使用 `map` 了，不管它是多么奇特怪异。这种伪超自然的力量要归功于 functor 的定律，我们将在本章末尾对此作一番探索。无论如何，我们终于可以在不牺牲代码纯粹性的情况下，随意使用这些不纯的值了。
 
 好了，我们已经把野兽关进了笼子。但是，在某一时刻还是要把它放出来。因为对 `IO` 调用 `map` 已经积累了太多不纯的操作，最后再运行它无疑会打破平静。问题是在哪里，什么时候打开笼子的开关？而且有没有可能我们只运行 `IO` 却不让不纯的操作弄脏双手？答案是可以的，只要把责任推到调用者身上就行了。我们的纯代码，尽管阴险狡诈诡计多端，但是却始终保持一副清白无辜的模样，反而是实际运行 `IO` 并产生了作用的调用者，背了黑锅。来看一个具体的例子。
 
-```js
-
+```javascript
 ////// 纯代码库: lib/params.js ///////
 
 //  url :: IO String
@@ -433,7 +432,7 @@ lib/params.js 把 `url` 包裹在一个 `IO` 里，然后把这头野兽传给�
 
 有件事困扰我很久了，现在我必须得说出来：`IO` 的 `__value` 并不是它包含的值，也不是像两个下划线暗示那样是一个私有属性。`__value` 是手榴弹的弹栓，只应该被调用者以最公开的方式拉动。为了提醒用户它的变化无常，我们把它重命名为 `unsafePerformIO` 看看。
 
-```js
+```javascript
 var IO = function(f) {
   this.unsafePerformIO = f;
 }
@@ -447,14 +446,13 @@ IO.prototype.map = function(f) {
 
 `IO` 会成为一个忠诚的伴侣，帮助我们驯化那些狂野的非纯操作。下一节我们将学习一种跟 `IO` 在精神上相似，但是用法上又千差万别的类型。
 
-
 ## 异步任务
 
 回调（callback）是通往地狱的狭窄的螺旋阶梯。它们是埃舍尔（译者注：荷兰版画艺术家）设计的控制流。看到一个个嵌套的回调挤在大小括号搭成的架子上，让人不由自主地联想到地牢里的灵薄狱（还能再低点么！）（译者注：灵薄狱即 limbo，基督教中地狱边缘之意）。光是想到这样的回调就让我幽闭恐怖症发作了。不过别担心，处理异步代码，我们有一种更好的方式，它的名字以“F”开头。
 
 这种方式的内部机制过于复杂，复杂得哪怕我唾沫横飞也很难讲清楚。所以我们就直接用 Quildreen Motta 的 [Folktale](http://folktalejs.org/) 里的 `Data.Task` （之前是 `Data.Future`）。来见证一些例子吧：
 
-```js
+```javascript
 // Node readfile example:
 //=======================
 
@@ -500,7 +498,7 @@ Task.of(3).map(function(three){ return three + 1 });
 
 我们必须调用 `fork` 方法才能运行 `Task`，这种机制与 `unsafePerformIO` 类似。但也有不同，不同之处就像 `fork` 这个名称表明的那样，它会 fork 一个子进程运行它接收到的参数代码，其他部分的执行不受影响，主线程也不会阻塞。当然这种效果也可以用其他一些技术比如线程实现，但这里的这种方法工作起来就像是一个普通的异步调用，而且 event loop 能够不受影响地继续运转。我们来看一下 `fork`：
 
-```js
+```javascript
 // Pure application
 //=====================
 // blogTemplate :: String
@@ -533,7 +531,7 @@ $('#spinner').show();
 
 就算是有了 `Task`，`IO` 和 `Either` 这两个 functor 也照样能派上用场。待我举个简单例子向你说明一种更复杂、更假想的情况，虽然如此，这个例子还是能够说明我的目的。
 
-```js
+```javascript
 // Postgres.connect :: Url -> IO DbConnection
 // runQuery :: DbConnection -> ResultSet
 // readFile :: String -> Task Error String
@@ -568,12 +566,11 @@ getConfig("db.json").fork(
 
 实际当中，你很有可能在一个工作流中跑好几个异步任务，但我们还没有完整学习容器的 api 来应对这种情况。不必担心，我们很快就会去学习 monad 之类的概念。不过，在那之前，我们得先检查下所有这些背后的数学知识。
 
-
 ## 一点理论
 
 前面提到，functor 的概念来自于范畴学，并满足一些定律。我们先来探索这些实用的定律。
 
-```js
+```javascript
 // identity
 map(id) === id;
 
@@ -581,9 +578,9 @@ map(id) === id;
 compose(map(f), map(g)) === map(compose(f, g));
 ```
 
-*同一律*很简单，但是也很重要。因为这些定律都是可运行的代码，所以我们完全可以在我们自己的 functor 上试验它们，验证它们是否成立。
+_同一律_很简单，但是也很重要。因为这些定律都是可运行的代码，所以我们完全可以在我们自己的 functor 上试验它们，验证它们是否成立。
 
-```js
+```javascript
 var idLaw1 = map(id);
 var idLaw2 = id;
 
@@ -596,7 +593,7 @@ idLaw2(Container.of(2));
 
 看到没，它们是相等的。接下来看一看组合。
 
-```js
+```javascript
 var compLaw1 = compose(map(concat(" world")), map(concat(" cruel")));
 var compLaw2 = map(compose(concat(" world"), concat(" cruel")));
 
@@ -611,17 +608,17 @@ compLaw2(Container.of("Goodbye"));
 
 可能我们关于范畴的定义还是有点模糊。你可以把范畴想象成一个有着多个对象的网络，对象之间靠态射连接。那么 functor 可以把一个范畴映射到另外一个，而且不会破坏原有的网络。如果一个对象 `a` 属于源范畴 `C`，那么通过 functor `F` 把 `a` 映射到目标范畴 `D` 上之后，就可以使用 `F a` 来指代 `a` 对象（把这些字母拼起来是什么？！）。可能看图会更容易理解：
 
-<img src="images/catmap.png" alt="Categories mapped" />
+![Categories mapped](../.gitbook/assets/catmap.png)
 
 比如，`Maybe` 就把类型和函数的范畴映射到这样一个范畴：即每个对象都有可能不存在，每个态射都有空值检查的范畴。这个结果在代码中的实现方式是用 `map` 包裹每一个函数，用 functor 包裹每一个类型。这样就能保证每个普通的类型和函数都能在新环境下继续使用组合。从技术上讲，代码中的 functor 实际上是把范畴映射到了一个包含类型和函数的子范畴（sub category）上，使得这些 functor 成为了一种新的特殊的 endofunctor。但出于本书的目的，我们认为它就是一个不同的范畴。
 
 可以用一张图来表示这种态射及其对象的映射：
 
-<img src="images/functormap.png" alt="functor diagram" />
+![functor diagram](../.gitbook/assets/functormap.png)
 
 这张图除了能表示态射借助 functor `F` 完成从一个范畴到另一个范畴的映射之外，我们发现它还符合交换律，也就是说，顺着箭头的方向往前，形成的每一个路径都指向同一个结果。不同的路径意味着不同的行为，但最终都会得到同一个数据类型。这种形式化给了我们原则性的方式去思考代码——无须分析和评估每一个单独的场景，只管可以大胆地应用公式即可。来看一个具体的例子。
 
-```js
+```javascript
 //  topRoute :: String -> Maybe(String)
 var topRoute = compose(Maybe.of, reverse);
 
@@ -638,13 +635,13 @@ bottomRoute("hi");
 
 或者看图：
 
-<img src="images/functormapmaybe.png" alt="functor diagram 2" />
+![functor diagram 2](../.gitbook/assets/functormapmaybe.png)
 
 根据所有 functor 都有的特性，我们可以立即理解代码，重构代码。
 
 functor 也能嵌套使用：
 
-```js
+```javascript
 var nested = Task.of([Right.of("pillows"), Left.of("no sleep for you")]);
 
 map(map(map(toUpperCase)), nested);
@@ -653,7 +650,7 @@ map(map(map(toUpperCase)), nested);
 
 `nested` 是一个将来的数组，数组的元素有可能是程序抛出的错误。我们使用 `map` 剥开每一层的嵌套，然后对数组的元素调用传递进去的函数。可以看到，这中间没有回调、`if/else` 语句和 `for` 循环，只有一个明确的上下文。的确，我们必须要 `map(map(map(f)))` 才能最终运行函数。不想这么做的话，可以组合 functor。是的，你没听错：
 
-```js
+```javascript
 var Compose = function(f_g_x){
   this.getCompose = f_g_x;
 }
@@ -675,18 +672,17 @@ ctmd.getCompose;
 
 看，只有一个 `map`。functor 组合是符合结合律的，而且之前我们定义的 `Container` 实际上是一个叫 `Identity` 的 functor。identity 和可结合的组合也能产生一个范畴，这个特殊的范畴的对象是其他范畴，态射是 functor。这实在太伤脑筋了，所以我们不会深入这个问题，但是赞叹一下这种模式的结构性含义，或者它的简单的抽象之美也是好的。
 
-
 ## 总结
 
 我们已经认识了几个不同的 functor，但它们的数量其实是无限的。有一些值得注意的可迭代数据类型（iterable data structure）我们没有介绍，像 tree、list、map 和 pair 等，以及所有你能说出来的。eventstream 和 observable 也都是 functor。其他的 functor 可能就是拿来做封装或者仅仅是模拟类型。我们身边到处都有 functor 的身影，本书也将会大量使用它们。
 
 用多个 functor 参数调用一个函数怎么样呢？处理一个由不纯的或者异步的操作组成的有序序列怎么样呢？要应对这个什么都装在盒子里的世界，目前我们工具箱里的工具还不全。下一章，我们将直奔 monad 而去。
 
-[第 9 章: Monad](ch9.md)
+[第 9 章: Monad](../di-9-zhang-monad/)
 
 ## 练习
 
-```js
+```javascript
 require('../../support');
 var Task = require('data.task');
 var _ = require('ramda');
@@ -786,3 +782,4 @@ var save = function(x){
 
 var ex8 = undefined
 ```
+

@@ -1,4 +1,4 @@
-# 第 6 章: 示例应用
+# 第 6章: 示例应用
 
 ## 声明式代码
 
@@ -10,7 +10,7 @@
 
 对包括我在内的一些人来说，一开始是不太容易理解“声明式”这个概念的；所以让我们写几个例子找找感觉。
 
-```js
+```javascript
 // 命令式
 var makes = [];
 for (i = 0; i < cars.length; i++) {
@@ -32,7 +32,7 @@ var makes = cars.map(function(car){ return car.make; });
 
 再看一个例子。
 
-```js
+```javascript
 // 命令式
 var authenticate = function(form) {
   var user = toUser(form);
@@ -51,7 +51,7 @@ var authenticate = compose(logIn, toUser);
 
 现在我们以一种声明式的、可组合的方式创建一个示例应用。暂时我们还是会作点小弊，使用副作用；但我们会把副作用的程度降到最低，让它们与纯函数代码分离开来。这个示例应用是一个浏览器 widget，功能是从 flickr 获取图片并在页面上展示。我们从写 html 开始：
 
-```html
+```markup
 <!DOCTYPE html>
 <html>
   <head>
@@ -64,7 +64,7 @@ var authenticate = compose(logIn, toUser);
 
 flickr.js 如下：
 
-```js
+```javascript
 requirejs.config({
   paths: {
     ramda: 'https://cdnjs.cloudflare.com/ajax/libs/ramda/0.13.0/ramda.min',
@@ -96,7 +96,7 @@ require([
 
 注意到没？上面提到了两个不纯的动作，即从 flickr 的 api 获取数据和在屏幕上放置图片这两件事。我们先来定义这两个动作，这样就能隔离它们了。
 
-```js
+```javascript
 var Impure = {
   getJSON: _.curry(function(callback, url) {
     $.getJSON(url, callback);
@@ -112,7 +112,7 @@ var Impure = {
 
 下一步是构造 url 传给 `Impure.getJSON` 函数。
 
-```js
+```javascript
 var url = function (term) {
   return 'https://api.flickr.com/services/feeds/photos_public.gne?tags=' + term + '&format=json&jsoncallback=?';
 };
@@ -122,7 +122,7 @@ var url = function (term) {
 
 让我们写一个 `app` 函数发送请求并把内容放置到屏幕上。
 
-```js
+```javascript
 var app = _.compose(Impure.getJSON(trace("response")), url);
 
 app("cats");
@@ -130,13 +130,13 @@ app("cats");
 
 这会调用 `url` 函数，然后把字符串传给 `getJSON` 函数。`getJSON` 已经局部应用了 `trace`，加载这个应用将会把请求的响应显示在 console 里。
 
-<img src="images/console_ss.png"/>
+![](../.gitbook/assets/console_ss.png)
 
 我们想要从这个 json 里构造图片，看起来 src 都在 `items` 数组中的每个 `media` 对象的 `m` 属性上。
 
 不管怎样，我们可以使用 ramda 的一个通用 getter 函数 `_.prop()` 来获取这些嵌套的属性。不过为了让你明白这个函数做了什么事情，我们自己实现一个 prop 看看：
 
-```js
+```javascript
 var prop = _.curry(function(property, object){
   return object[property];
 });
@@ -144,7 +144,7 @@ var prop = _.curry(function(property, object){
 
 实际上这有点傻，仅仅是用 `[]` 来获取一个对象的属性而已。让我们利用这个函数获取图片的 src。
 
-```js
+```javascript
 var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
 
 var srcs = _.compose(_.map(mediaUrl), _.prop('items'));
@@ -152,7 +152,7 @@ var srcs = _.compose(_.map(mediaUrl), _.prop('items'));
 
 一旦得到了 `items`，就必须使用 `map` 来分解每一个 url；这样就得到了一个包含所有 src 的数组。把它和 `app` 联结起来，打印结果看看。
 
-```js
+```javascript
 var renderImages = _.compose(Impure.setHtml("body"), srcs);
 var app = _.compose(Impure.getJSON(renderImages), url);
 ```
@@ -161,7 +161,7 @@ var app = _.compose(Impure.getJSON(renderImages), url);
 
 最后一步是把这些 src 变为真正的图片。对大型点的应用来说，是应该使用类似 Handlebars 或者 React 这样的 template/dom 库来做这件事的。但我们这个应用太小了，只需要一个 img 标签，所以用 jQuery 就好了。
 
-```js
+```javascript
 var img = function (url) {
   return $('<img />', { src: url });
 };
@@ -169,7 +169,7 @@ var img = function (url) {
 
 jQuery 的 `html()` 方法接受标签数组为参数，所以我们只须把 src 转换为 img 标签然后传给 `setHtml` 即可。
 
-```js
+```javascript
 var images = _.compose(_.map(img), srcs);
 var renderImages = _.compose(Impure.setHtml("body"), images);
 var app = _.compose(Impure.getJSON(renderImages), url);
@@ -177,11 +177,11 @@ var app = _.compose(Impure.getJSON(renderImages), url);
 
 任务完成！
 
-<img src="images/cats_ss.png" />
+![](../.gitbook/assets/cats_ss.png)
 
 下面是完整代码：
 
-```js
+```javascript
 requirejs.config({
   paths: {
     ramda: 'https://cdnjs.cloudflare.com/ajax/libs/ramda/0.13.0/ramda.min',
@@ -242,26 +242,25 @@ require([
 
 上面的代码是有优化空间的——我们获取 url map 了一次，把这些 url 变为 img 标签又 map 了一次。关于 map 和组合是有定律的：
 
-```js
+```javascript
 // map 的组合律
 var law = compose(map(f), map(g)) == map(compose(f, g));
 ```
 
 我们可以利用这个定律优化代码，进行一次有原则的重构。
 
-```js
+```javascript
 // 原有代码
 var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
 
 var srcs = _.compose(_.map(mediaUrl), _.prop('items'));
 
 var images = _.compose(_.map(img), srcs);
-
 ```
 
 感谢等式推导（equational reasoning）及纯函数的特性，我们可以内联调用 `srcs` 和 `images`，也就是把 map 调用排列起来。
 
-```js
+```javascript
 var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
 
 var images = _.compose(_.map(img), _.map(mediaUrl), _.prop('items'));
@@ -269,7 +268,7 @@ var images = _.compose(_.map(img), _.map(mediaUrl), _.prop('items'));
 
 把 `map` 排成一列之后就可以应用组合律了。
 
-```js
+```javascript
 var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
 
 var images = _.compose(_.map(_.compose(img, mediaUrl)), _.prop('items'));
@@ -277,7 +276,7 @@ var images = _.compose(_.map(_.compose(img, mediaUrl)), _.prop('items'));
 
 现在只需要循环一次就可以把每一个对象都转为 img 标签了。我们把 map 调用的 compose 取出来放到外面，提高一下可读性。
 
-```js
+```javascript
 var mediaUrl = _.compose(_.prop('m'), _.prop('media'));
 
 var mediaToImg = _.compose(img, mediaUrl);
@@ -289,4 +288,5 @@ var images = _.compose(_.map(mediaToImg), _.prop('items'));
 
 我们已经见识到如何在一个小而不失真实的应用中运用新技能了，也已经使用过函数式这个“数学框架”来推导和重构代码了。但是异常处理以及代码分支呢？如何让整个应用都是函数式的，而不仅仅是把破坏性的函数放到命名空间下？如何让应用更安全更富有表现力？这些都是本书第 2 部分将要解决的问题。
 
-[第 7 章: Hindley-Milner 类型签名](ch7.md)
+[第 7 章: Hindley-Milner 类型签名](../di-7-zhang-hindleymilner-lei-xing-qian-ming/)
+
